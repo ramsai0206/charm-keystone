@@ -1,12 +1,12 @@
 #!/usr/bin/make
-PYTHON := /usr/bin/env python
+PYTHON := /usr/bin/env python3
 
 lint:
 	@tox -e pep8
 
 test:
 	@echo Starting unit tests...
-	@tox -e py27
+	@tox -e py3
 
 functional_test:
 	@echo Starting Zaza functional tests...
