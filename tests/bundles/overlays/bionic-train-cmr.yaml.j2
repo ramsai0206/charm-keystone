@@ -1,0 +1,8 @@
+relations:
+- - keystone:certificates
+  - vault:certificates
+- - glance:certificates
+  - vault:certificates
+saas:
+  vault:
+    url: admin/{{ vault }}.vault

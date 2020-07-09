@@ -13,6 +13,9 @@ gate_bundles:
 - focal-xena
 - hirsute-wallaby
 - impish-xena
+- bionic-train-vault-cmr:
+  - vault: bionic-vault
+  - keystone: bionic-train-cmr
 
 dev_bundles:
 - bionic-rocky
@@ -25,10 +28,21 @@ comment: |
   The policyd test is generic and validates the policy.d overrides work
 
 configure:
+- vault:
+  - zaza.openstack.charm_tests.vault.setup.auto_initialize_no_validation_no_wait
+- keystone:
+  - zaza.openstack.charm_tests.keystone.setup.wait_for_cacert
+  - zaza.openstack.charm_tests.glance.setup.add_lts_image
+  - zaza.openstack.charm_tests.keystone.setup.add_demo_user
 - zaza.openstack.charm_tests.glance.setup.add_lts_image
 - zaza.openstack.charm_tests.keystone.setup.add_demo_user
 
 tests:
+- keystone:
+  - zaza.openstack.charm_tests.keystone.tests.AuthenticationAuthorizationTest
+  - zaza.openstack.charm_tests.keystone.tests.CharmOperationTest
+  - zaza.openstack.charm_tests.keystone.tests.SecurityTests
+  - zaza.openstack.charm_tests.policyd.tests.KeystoneTests
 - zaza.openstack.charm_tests.keystone.tests.AuthenticationAuthorizationTest
 - zaza.openstack.charm_tests.keystone.tests.CharmOperationTest
 - zaza.openstack.charm_tests.keystone.tests.SecurityTests
@@ -41,3 +55,7 @@ tests_options:
     - hirsute-wallaby
     - impish-xena
     - jammy-yoga
+target_deploy_status:
+  vault:
+    workload-status: blocked
+    workload-status-message: Vault needs to be initialized
