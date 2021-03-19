@@ -21,6 +21,8 @@ import os
 import subprocess
 import time
 
+import charmhelpers.contrib.openstack.utils as os_utils
+
 from test_utils import CharmTestCase
 
 import keystone_types as ks_types
@@ -190,20 +192,35 @@ class TestKeystoneUtils(CharmTestCase):
         result = utils.determine_ports()
         self.assertEqual(result, ['80', '81'])
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch('charmhelpers.contrib.openstack.utils.config')
-    def test_determine_packages(self, _config):
+    def test_determine_packages(
+            self,
+            _config,
+            _get_subordinate_release_packages):
         self.os_release.return_value = 'havana'
         self.snap_install_requested.return_value = False
         _config.return_value = None
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         result = utils.determine_packages()
         ex = utils.BASE_PACKAGES + ['keystone', 'python-keystoneclient']
         self.assertEqual(set(ex), set(result))
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(['sub-pkg']), set())
+        self.assertIn('sub-pkg', utils.determine_packages())
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch('charmhelpers.contrib.openstack.utils.config')
-    def test_determine_packages_queens(self, _config):
+    def test_determine_packages_queens(
+            self,
+            _config,
+            _get_subordinate_release_packages):
         self.os_release.return_value = 'queens'
         self.snap_install_requested.return_value = False
         _config.return_value = None
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         result = utils.determine_packages()
         ex = utils.BASE_PACKAGES + [
             'keystone', 'python-keystoneclient', 'memcached',
@@ -211,39 +228,69 @@ class TestKeystoneUtils(CharmTestCase):
         ]
         self.assertEqual(set(ex), set(result))
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch('charmhelpers.contrib.openstack.utils.config')
-    def test_determine_packages_rocky(self, _config):
+    def test_determine_packages_rocky(
+            self,
+            _config,
+            _get_subordinate_release_packages):
         self.os_release.return_value = 'rocky'
         self.snap_install_requested.return_value = False
         _config.return_value = None
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         result = utils.determine_packages()
         ex = list(set(
             [p for p in utils.BASE_PACKAGES if not p.startswith('python-')] +
             ['memcached'] + utils.PY3_PACKAGES))
         self.assertEqual(set(ex), set(result))
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch('charmhelpers.contrib.openstack.utils.config')
-    def test_determine_packages_snap_install(self, _config):
+    def test_determine_packages_snap_install(
+            self,
+            _config,
+            _get_subordinate_release_packages):
         self.os_release.return_value = 'mitaka'
         self.snap_install_requested.return_value = True
         _config.return_value = None
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         result = utils.determine_packages()
         ex = utils.BASE_PACKAGES_SNAP + ['memcached']
         self.assertEqual(set(ex), set(result))
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(['sub-snap']), set())
+        self.assertIn('sub-snap', utils.determine_packages())
 
-    def test_determine_purge_packages(self):
+    @patch.object(utils, 'get_subordinate_release_packages')
+    def test_determine_purge_packages(self, _get_subordinate_release_packages):
         'Ensure no packages are identified for purge prior to rocky'
         self.os_release.return_value = 'queens'
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         self.assertEqual(utils.determine_purge_packages(), [])
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set(['sub-purge']))
+        self.assertEqual(utils.determine_purge_packages(), ['sub-purge'])
 
-    def test_determine_purge_packages_rocky(self):
+    @patch.object(utils, 'get_subordinate_release_packages')
+    def test_determine_purge_packages_rocky(
+            self,
+            _get_subordinate_release_packages):
         'Ensure python packages are identified for purge at rocky'
         self.os_release.return_value = 'rocky'
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         self.assertEqual(utils.determine_purge_packages(),
-                         [p for p in utils.BASE_PACKAGES
-                          if p.startswith('python-')] +
-                         ['python-keystone', 'python-memcache'])
+                         sorted([p for p in utils.BASE_PACKAGES
+                                 if p.startswith('python-')] +
+                                ['python-keystone', 'python-memcache']))
+        _get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set(['sub-purge']))
+        self.assertIn('sub-purge', utils.determine_purge_packages())
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(utils, 'bootstrap_keystone')
     @patch.object(utils, 'is_elected_leader')
     @patch.object(utils, 'disable_unused_apache_sites')
@@ -254,13 +301,16 @@ class TestKeystoneUtils(CharmTestCase):
     def test_openstack_upgrade_leader(
             self, migrate_database, determine_packages,
             run_in_apache, os_path_exists, disable_unused_apache_sites,
-            mock_is_elected_leader, mock_bootstrap_keystone):
+            mock_is_elected_leader, mock_bootstrap_keystone,
+            mock_get_subordinate_release_packages):
         configs = MagicMock()
         self.test_config.set('openstack-origin', 'cloud:xenial-newton')
         self.os_release.return_value = 'ocata'
         determine_packages.return_value = []
         os_path_exists.return_value = True
         run_in_apache.return_value = True
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
 
         utils.do_openstack_upgrade(configs)
 

@@ -58,6 +58,7 @@ from charmhelpers.contrib.openstack.utils import (
     get_api_application_status,
     get_os_codename_install_source,
     get_snaps_install_info_from_origin,
+    get_subordinate_release_packages,
     install_os_snaps,
     is_unit_paused_set,
     make_assess_status_func,
@@ -669,21 +670,26 @@ def api_port(service):
 
 
 def determine_packages():
-    release = CompareOpenStackReleases(os_release('keystone'))
+    release = os_release('keystone')
+    cmp_release = CompareOpenStackReleases(release)
 
     # currently all packages match service names
     if snap_install_requested():
         pkgs = deepcopy(BASE_PACKAGES_SNAP)
-        if enable_memcache(release=os_release('keystone')):
+        if enable_memcache(release=release):
             pkgs = pkgs + ['memcached']
+        pkgs = set(pkgs).union(get_subordinate_release_packages(
+            release, package_type='snap').install)
         return sorted(pkgs)
     else:
         packages = set(services()).union(BASE_PACKAGES)
-        if release >= 'rocky':
+        if cmp_release >= 'rocky':
             packages = [p for p in packages if not p.startswith('python-')]
             packages.extend(PY3_PACKAGES)
         elif run_in_apache():
             packages.add('libapache2-mod-wsgi')
+        packages = set(packages).union(get_subordinate_release_packages(
+            release).install)
         return sorted(packages)
 
 
@@ -694,12 +700,16 @@ def determine_purge_packages():
 
     :returns: list of package names
     '''
-    release = CompareOpenStackReleases(os_release('keystone'))
-    if release >= 'rocky':
+    release = os_release('keystone')
+    cmp_release = CompareOpenStackReleases(release)
+    pkgs = []
+    if cmp_release >= 'rocky':
         pkgs = [p for p in BASE_PACKAGES if p.startswith('python-')]
         pkgs.extend(['python-keystone', 'python-memcache'])
-        return pkgs
-    return []
+    pkgs = set(pkgs).union(
+        get_subordinate_release_packages(
+            release).purge)
+    return sorted(pkgs)
 
 
 def remove_old_packages():

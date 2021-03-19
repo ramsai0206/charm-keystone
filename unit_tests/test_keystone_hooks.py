@@ -16,6 +16,8 @@ import importlib
 import os
 import sys
 
+import charmhelpers.contrib.openstack.utils as os_utils
+
 from mock import call, patch, MagicMock, ANY
 from test_utils import CharmTestCase
 
@@ -117,17 +119,21 @@ class KeystoneRelationTests(CharmTestCase):
         self.ssh_user = 'juju_keystone'
         self.snap_install_requested.return_value = False
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'maybe_do_policyd_overrides')
     @patch.object(utils, 'os_release')
     @patch.object(hooks, 'service_stop', lambda *args: None)
     @patch.object(hooks, 'service_start', lambda *args: None)
     def test_install_hook(self,
                           os_release,
-                          mock_maybe_do_policyd_overrides):
+                          mock_maybe_do_policyd_overrides,
+                          mock_get_subordinate_release_packages):
         os_release.return_value = 'havana'
         self.run_in_apache.return_value = False
         repo = 'cloud:precise-grizzly'
         self.test_config.set('openstack-origin', repo)
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.install()
         self.assertTrue(self.execd_preinstall.called)
         self.configure_installation_source.assert_called_with(repo)
@@ -140,17 +146,21 @@ class KeystoneRelationTests(CharmTestCase):
         mock_maybe_do_policyd_overrides.assert_called_once_with(
             ANY, "keystone", restart_handler=ANY)
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'maybe_do_policyd_overrides')
     @patch.object(utils, 'os_release')
     @patch.object(hooks, 'service_stop', lambda *args: None)
     @patch.object(hooks, 'service_start', lambda *args: None)
     def test_install_hook_apache2(self,
                                   os_release,
-                                  mock_maybe_do_policyd_overrides):
+                                  mock_maybe_do_policyd_overrides,
+                                  mock_get_subordinate_release_packages):
         os_release.return_value = 'havana'
         self.run_in_apache.return_value = True
         repo = 'cloud:xenial-newton'
         self.test_config.set('openstack-origin', repo)
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.install()
         self.assertTrue(self.execd_preinstall.called)
         self.configure_installation_source.assert_called_with(repo)
@@ -617,6 +627,7 @@ class KeystoneRelationTests(CharmTestCase):
         cmd = ['a2dissite', 'openstack_https_frontend']
         self.check_call.assert_called_with(cmd)
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'bootstrap_keystone')
     @patch.object(hooks,
                   'ensure_all_service_accounts_protected_for_pci_dss_options')
@@ -638,7 +649,8 @@ class KeystoneRelationTests(CharmTestCase):
                                   update,
                                   mock_maybe_do_policyd_overrides,
                                   mock_protect_service_accounts,
-                                  mock_bootstrap_keystone):
+                                  mock_bootstrap_keystone,
+                                  mock_get_subordinate_release_packages):
         os_release.return_value = 'havana'
         mock_is_db_initialised.return_value = True
         mock_is_db_ready.return_value = True
@@ -647,6 +659,8 @@ class KeystoneRelationTests(CharmTestCase):
         self.services.return_value = ['apache2']
 
         self.filter_installed_packages.return_value = ['something']
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.upgrade_charm()
         self.assertTrue(self.apt_install.called)
         self.assertTrue(update.called)
@@ -658,6 +672,7 @@ class KeystoneRelationTests(CharmTestCase):
             ANY, "keystone", restart_handler=ANY)
         mock_protect_service_accounts.assert_called_once_with()
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'bootstrap_keystone')
     @patch.object(hooks,
                   'ensure_all_service_accounts_protected_for_pci_dss_options')
@@ -669,17 +684,19 @@ class KeystoneRelationTests(CharmTestCase):
     @patch('keystone_utils.log')
     @patch('keystone_utils.relation_ids')
     @patch.object(hooks, 'stop_manager_instance')
-    def test_upgrade_charm_leader_no_packages(self,
-                                              mock_stop_manager_instance,
-                                              mock_relation_ids,
-                                              mock_log,
-                                              mock_is_db_initialised,
-                                              mock_is_db_ready,
-                                              os_release,
-                                              update,
-                                              mock_maybe_do_policyd_overrides,
-                                              mock_protect_service_accounts,
-                                              mock_bootstrap_keystone):
+    def test_upgrade_charm_leader_no_packages(
+            self,
+            mock_stop_manager_instance,
+            mock_relation_ids,
+            mock_log,
+            mock_is_db_initialised,
+            mock_is_db_ready,
+            os_release,
+            update,
+            mock_maybe_do_policyd_overrides,
+            mock_protect_service_accounts,
+            mock_bootstrap_keystone,
+            mock_get_subordinate_release_packages):
         os_release.return_value = 'havana'
         mock_is_db_initialised.return_value = True
         mock_is_db_ready.return_value = True
@@ -688,6 +705,8 @@ class KeystoneRelationTests(CharmTestCase):
         self.services.return_value = ['apache2']
 
         self.filter_installed_packages.return_value = []
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.upgrade_charm()
         self.assertFalse(self.apt_install.called)
         self.assertTrue(update.called)
@@ -817,6 +836,7 @@ class KeystoneRelationTests(CharmTestCase):
         # Still updates relations
         self.assertTrue(self.relation_ids.called)
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'bootstrap_keystone')
     @patch.object(hooks, 'maybe_do_policyd_overrides')
     @patch.object(hooks, 'update_all_identity_relation_units')
@@ -830,11 +850,14 @@ class KeystoneRelationTests(CharmTestCase):
                                       mock_log,
                                       os_release, update,
                                       mock_maybe_do_policyd_overrides,
-                                      mock_bootstrap_keystone):
+                                      mock_bootstrap_keystone,
+                                      mock_get_subordinate_release_packages):
         os_release.return_value = 'havana'
 
         self.filter_installed_packages.return_value = ['something']
         self.is_elected_leader.return_value = False
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.upgrade_charm()
         self.assertTrue(self.apt_install.called)
         self.assertTrue(self.log.called)
@@ -844,6 +867,7 @@ class KeystoneRelationTests(CharmTestCase):
         mock_maybe_do_policyd_overrides.assert_called_once_with(
             ANY, "keystone", restart_handler=ANY)
 
+    @patch.object(utils, 'get_subordinate_release_packages')
     @patch.object(hooks, 'bootstrap_keystone')
     @patch.object(hooks, 'maybe_do_policyd_overrides')
     @patch.object(hooks, 'update_all_identity_relation_units')
@@ -860,11 +884,14 @@ class KeystoneRelationTests(CharmTestCase):
         update,
         mock_maybe_do_policyd_overrides,
         mock_bootstrap_keystone,
+        mock_get_subordinate_release_packages,
     ):
         os_release.return_value = 'havana'
 
         self.filter_installed_packages.return_value = []
         self.is_elected_leader.return_value = False
+        mock_get_subordinate_release_packages.return_value = \
+            os_utils.SubordinatePackages(set(), set())
         hooks.upgrade_charm()
         self.assertFalse(self.apt_install.called)
         self.assertTrue(self.log.called)
