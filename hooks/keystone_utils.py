@@ -1467,8 +1467,10 @@ def store_data(backing_file, data):
 
 def get_admin_passwd(user=None):
     passwd = config("admin-password")
-    if passwd and passwd.lower() != "none":
-        return passwd
+    if passwd:
+        passwd = passwd.strip()
+        if passwd.lower() != "none":
+            return passwd
 
     if user is None:
         user = config('admin-user')
