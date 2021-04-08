@@ -107,6 +107,13 @@ options:
     type: int
     default: 60
     description: Amount of time (in seconds) the catalog should be cached for.
+  dogpile-cache-expiration:
+    type: int
+    default: 600
+    description: |
+      Amount of time (in seconds) to cache items in the dogpile.cache. This
+      only applies to cached methods that do not have an explicitly defined
+      cache expiration time.
   fernet-max-active-keys:
     type: int
     default: 3
