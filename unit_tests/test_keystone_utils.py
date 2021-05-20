@@ -1138,6 +1138,10 @@ class TestKeystoneUtils(CharmTestCase):
     def test_get_admin_passwd_pwd_set(self):
         self.test_config.set('admin-password', 'supersecret')
         self.assertEqual(utils.get_admin_passwd(), 'supersecret')
+        self.test_config.set('admin-password', 'supersecret ')
+        self.assertEqual(utils.get_admin_passwd(), 'supersecret')
+        self.test_config.set('admin-password', 'supersecret\n')
+        self.assertEqual(utils.get_admin_passwd(), 'supersecret')
 
     @patch.object(utils, 'is_leader')
     @patch.object(utils, 'leader_get')
