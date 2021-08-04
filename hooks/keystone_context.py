@@ -163,6 +163,20 @@ class HAProxyContext(context.HAProxyContext):
                 api_port('keystone-public'), a_public_port],
         }
 
+        # use httpchk to ensure the keystone backend is healthy
+        backend_options = {
+            'admin-port': [
+                {'option': 'httpchk GET /v3'},
+                {'http-check': 'expect string stable'}
+            ],
+            'public-port': [
+                {'option': 'httpchk GET /v3'},
+                {'http-check': 'expect string stable'}
+            ]
+        }
+
+        # for haproxy.conf
+        ctxt['backend_options'] = backend_options
         # for haproxy.conf
         ctxt['service_ports'] = port_mapping
         # for keystone.conf
