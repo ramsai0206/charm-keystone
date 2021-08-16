@@ -135,16 +135,6 @@ class TestKeystoneContexts(CharmTestCase):
                 'admin-port': ['12', '34'],
                 'public-port': ['12', '34']
             },
-            'backend_options': {
-                'admin-port': [
-                    {'option': 'httpchk GET /v3'},
-                    {'http-check': 'expect string stable'}
-                ],
-                'public-port': [
-                    {'option': 'httpchk GET /v3'},
-                    {'http-check': 'expect string stable'}
-                ]
-            },
             'default_backend': '1.2.3.4',
             'frontends': {
                 '1.2.3.4': {
