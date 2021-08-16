@@ -466,7 +466,7 @@ class KeystoneRelationTests(CharmTestCase):
 
     @patch('keystone_utils.log')
     def test_identity_changed_no_leader(self, mock_log):
-        self.is_elected_leader.return_value = False
+        self.is_leader.return_value = False
         hooks.identity_changed(
             relation_id='identity-service:0',
             remote_unit='unit/0')
