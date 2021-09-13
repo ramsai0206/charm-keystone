@@ -4,7 +4,7 @@ smoke_bundles:
 - focal-ussuri
 
 gate_bundles:
-- groovy-victoria
+- focal-xena
 - focal-wallaby
 - focal-victoria
 - focal-ussuri
@@ -20,6 +20,7 @@ dev_bundles:
 - xenial-pike
 - xenial-queens
 - bionic-rocky
+- groovy-victoria
 - hirsute-wallaby
 
 comment: |
@@ -40,4 +41,5 @@ tests_options:
   policyd:
     service: keystone
   force_deploy:
-    - hisute-wallaby
+    - groovy-victoria
+    - impish-xena
