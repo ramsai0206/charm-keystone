@@ -2240,6 +2240,20 @@ def send_id_service_notifications(data):
                 relation_settings={
                     'catalog_ttl': config('catalog-cache-expiration'),
                     'ep_changed': json.dumps(changed, sort_keys=True)})
+            # As a first step in resolving a race condition when updating
+            # identity and identity-notifications (LP: #1902264), start sending
+            # this data into the application data-bag instead of just the
+            # per-unit relation data. The consuming charms will need updating
+            # to look in the app data bag as well.
+            #
+            # After the charms consuming thie relation have been updated,
+            # it will be possible to remove the per-relation set above.
+            relation_set(
+                relation_id=rid,
+                relation_settings={
+                    'catalog_ttl': config('catalog-cache-expiration'),
+                    'ep_changed': json.dumps(changed, sort_keys=True)},
+                app=True)
 
 
 def send_notifications(checksum_data, endpoint_data, force=False):
@@ -2262,7 +2276,7 @@ def send_id_notifications(data, force=False):
     :param force: Determines whether a trigger value is set to ensure the
                   remote hook is fired.
     """
-    if not data or not is_elected_leader(CLUSTER_RES):
+    if not data or not is_leader():
         log("Not sending notifications (no data or not leader)", level=INFO)
         return
 
@@ -2311,6 +2325,17 @@ def send_id_notifications(data, force=False):
         level=DEBUG)
     for rid in rel_ids:
         relation_set(relation_id=rid, relation_settings=_notifications)
+        # As a first step in resolving a race condition when updating
+        # identity and identity-notifications (LP: #1902264), start sending
+        # this data into the application data-bag instead of just the
+        # per-unit relation data. The consuming charms will need updating
+        # to look in the app data bag as well.
+        #
+        # After the charms consuming thie relation have been updated,
+        # it will be possible to remove the per-relation set above.
+        relation_set(relation_id=rid,
+                     relation_settings=_notifications,
+                     app=True)
 
 
 def is_db_ready(use_current_context=False, db_rel=None):

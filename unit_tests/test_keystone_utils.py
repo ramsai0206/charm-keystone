@@ -893,32 +893,50 @@ class TestKeystoneUtils(CharmTestCase):
     @patch.object(utils, 'relation_set')
     @patch.object(utils, 'relation_get')
     @patch.object(utils, 'relation_ids')
-    @patch.object(utils, 'is_elected_leader')
-    def test_send_id_notifications(self, mock_is_elected_leader,
+    @patch.object(utils, 'is_leader')
+    def test_send_id_notifications(self, mock_is_leader,
                                    mock_relation_ids, mock_relation_get,
                                    mock_relation_set, mock_uuid):
         checksums = {'foo-endpoint-changed': 1}
         relation_id = 'testrel:0'
         mock_uuid.uuid4.return_value = '1234'
         mock_relation_ids.return_value = [relation_id]
-        mock_is_elected_leader.return_value = False
+        mock_is_leader.return_value = False
         utils.send_id_notifications(checksums)
         self.assertFalse(mock_relation_set.called)
 
-        mock_is_elected_leader.return_value = True
+        mock_is_leader.return_value = True
         utils.send_id_notifications({})
         self.assertFalse(mock_relation_set.called)
 
         utils.send_id_notifications(checksums)
         self.assertTrue(mock_relation_set.called)
-        mock_relation_set.assert_called_once_with(relation_id=relation_id,
-                                                  relation_settings=checksums)
+        mock_relation_set.assert_has_calls([
+            call(
+                relation_id=relation_id,
+                relation_settings=checksums,
+                app=True
+            ),
+            call(
+                relation_id=relation_id,
+                relation_settings=checksums
+            ),
+        ], any_order=True)
         mock_relation_set.reset_mock()
         utils.send_id_notifications(checksums, force=True)
         self.assertTrue(mock_relation_set.called)
         checksums['trigger'] = '1234'
-        mock_relation_set.assert_called_once_with(relation_id=relation_id,
-                                                  relation_settings=checksums)
+        mock_relation_set.assert_has_calls([
+            call(
+                relation_id=relation_id,
+                relation_settings=checksums,
+                app=True
+            ),
+            call(
+                relation_id=relation_id,
+                relation_settings=checksums
+            ),
+        ], any_order=True)
 
     @patch.object(utils, 'service_endpoint_dict')
     @patch.object(utils, 'relation_ids')
@@ -984,7 +1002,8 @@ class TestKeystoneUtils(CharmTestCase):
                     'ep_changed':
                         ('{"neutron": {"internal": '
                          '"http://neutron.demo.com:9696"}}')
-                }
+                },
+                app=True
             ),
             call(
                 relation_id='identity-service:2',
@@ -994,7 +1013,8 @@ class TestKeystoneUtils(CharmTestCase):
                         ('{"neutron": {"internal": '
                          '"http://neutron.demo.com:9696"},'
                          ' "placement": {"internal": "http://demo.com"}}')
-                }
+                },
+                app=True
             )
         ], any_order=True)
 
@@ -1009,7 +1029,8 @@ class TestKeystoneUtils(CharmTestCase):
                     'catalog_ttl': 60,
                     'ep_changed':
                         '{"neutron": {"internal": "http://demo.com"}}'
-                }
+                },
+                app=True
             ),
             call(
                 relation_id='identity-service:2',
@@ -1017,7 +1038,8 @@ class TestKeystoneUtils(CharmTestCase):
                     'catalog_ttl': 60,
                     'ep_changed':
                         '{"neutron": {"internal": "http://demo.com"}}'
-                }
+                },
+                app=True
             )
         ]
         mock_relation_set.assert_has_calls(
@@ -1036,7 +1058,8 @@ class TestKeystoneUtils(CharmTestCase):
                     'catalog_ttl': 60,
                     'ep_changed':
                         '{"neutron": {"internal": "http://demo.com"}}'
-                }
+                },
+                app=True
             ),
             call(
                 relation_id='identity-service:2',
@@ -1046,7 +1069,8 @@ class TestKeystoneUtils(CharmTestCase):
                         '{"neutron": {"internal": "http://demo.com"}, '
                         '"placement": {"internal": "http://demo.com"}}'
                     )
-                }
+                },
+                app=True
             )
         ]
         mock_relation_set.assert_has_calls(

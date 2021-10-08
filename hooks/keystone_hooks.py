@@ -427,7 +427,7 @@ def db_departed_or_broken():
 def identity_changed(relation_id=None, remote_unit=None):
     notifications_checksums = {}
     notifications_endpoints = {}
-    if is_elected_leader(CLUSTER_RES):
+    if is_leader():
         if not is_db_ready():
             log("identity-service-relation-changed hook fired before db "
                 "ready - deferring until db ready", level=WARNING)
