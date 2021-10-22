@@ -35,7 +35,7 @@ applications:
       - '2'
 
   keystone:
-    charm: ../../../keystone
+    charm: ../../
     num_units: 3
     options:
       openstack-origin: *openstack-origin

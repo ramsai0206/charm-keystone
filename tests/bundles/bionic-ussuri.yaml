@@ -22,7 +22,7 @@ applications:
     to:
     - '0'
   keystone:
-    charm: ../../../keystone
+    charm: ../../
     num_units: 3
     options:
       openstack-origin: cloud:bionic-ussuri
