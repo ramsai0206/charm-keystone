@@ -871,6 +871,13 @@ def bootstrap_keystone(configs=None):
     # NOTE: The bootstrap process is necessary for the charm to be able to
     # talk to Keystone.  We will still rely on ``ensure_initial_admin`` to
     # maintain Keystone's endpoints and the rest of the CRUD.
+
+    if not os.path.exists(FERNET_KEY_REPOSITORY):
+        mkdir(FERNET_KEY_REPOSITORY,
+              owner=KEYSTONE_USER,
+              group=KEYSTONE_USER,
+              perms=0o700)
+
     api_suffix = get_api_suffix()
     charm_password = leader_get('{}_passwd'.format(CHARM_USER)) or pwgen(64)
     subprocess.check_call((
