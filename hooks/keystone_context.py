@@ -1,4 +1,4 @@
-# Copyright 2016 Canonical Ltd
+# Copyright 2016-2021 Canonical Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -220,7 +220,7 @@ class KeystoneContext(context.OSContextGenerator):
                 ctxt['ldap_config_flags'] = flags
 
         # Only try to decode it if there is something actually set - this
-        # siliences a NoneType warning in the logs if it isn't set
+        # silences a NoneType warning in the logs if it isn't set
         password_security_compliance = config('password-security-compliance')
         if password_security_compliance:
             ctxt['password_security_compliance'] = (
@@ -375,7 +375,7 @@ class FernetCronContext(context.OSContextGenerator):
 
 
 def fernet_enabled():
-    """Helper function for determinining whether Fernet tokens are enabled.
+    """Helper function for determining whether Fernet tokens are enabled.
 
     :returns: True if the fernet keys should be configured.
     :rtype: bool

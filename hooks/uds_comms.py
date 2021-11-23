@@ -19,7 +19,7 @@ class Codec():
     characters, and this is ensured by encoding the message using base64 (which
     doesn't contain either of those characters).
 
-    This is for sending over a unix domain socket which has interesting
+    This is for sending over a Unix domain socket which has interesting
     buffering -- this makes sure we can reconstruct entire messages between two
     processes.
     """
@@ -101,7 +101,7 @@ class Codec():
 
     def encode(self, message):
         """Encode a message for sending on a channel with inconsistent
-        buffering (e.g. like a unix domain socket.
+        buffering (e.g. like a Unix domain socket).
 
         Encodes the message by UTF-8, then base64 and finally adds '%' and '$'
         to the start and end of the message.  This is so the message can be
@@ -204,7 +204,7 @@ class UDSClient():
         other end of the UDS.  Uses the Codec() class to ensure that the
         messages are properly received and sent.
 
-        :returns: the string send by the Server.send() methdod.
+        :returns: the string sent by the Server.send() method.
         :rtype: str
         :raises: UDSException on Error
         """
@@ -243,7 +243,7 @@ class UDSServer():
 
     The Server listens for a connection, performs a handshake, and then is in
     control of the conversation.  The user of Server() should then send a
-    message and wait for a reponse.  It's up to the client to disconnect, so an
+    message and wait for a response.  It's up to the client to disconnect, so a
     protocol level message should be used (e.g. QUIT) that the user of Client()
     will use to close the connection.
 
@@ -271,7 +271,7 @@ class UDSServer():
         ensures that a client can connect.  The conversation doesn't get
         started until the wait_for_connection() method is called.
 
-        The server can initialse the Server, then ask the client to connect,
+        The server can initialise the Server, then ask the client to connect,
         and then at any point later call wait_for_connection() to get the
         conversation going.
 
@@ -323,7 +323,7 @@ class UDSServer():
         other end of the UDS.  Uses the Codec() class to ensure that the
         messages are properly received and sent.
 
-        :returns: the string send by the Client.send() methdod.
+        :returns: the string sent by the Client.send() method.
         :rtype: str
         :raises: UDSException on Error
         """

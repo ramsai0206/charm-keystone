@@ -1,4 +1,4 @@
-# Copyright 2016 Canonical Ltd
+# Copyright 2016-2021 Canonical Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ the same file that sent the arguments.
 
 {
     'result': <whatever the result of the function call was>
-    'error': <if an error occured, the text of the error
+    'error': <if an error occurred, the text of the error>
 }
 
 This system is currently needed to decouple the majority of the charm from the
@@ -125,7 +125,7 @@ def get_keystone_manager(endpoint, charm_credentials, api_version=None):
     """Return a keystonemanager for the correct API version
 
     If api_version has not been set then create a manager based on the endpoint
-    Use this manager to query the catalogue and determine which api version
+    Use this manager to query the catalogue and determine which API version
     should actually be being used. Return the correct client based on that.
     Function is wrapped in a retry_on_exception to catch the case where the
     keystone service is still initialising and not responding to requests yet.
@@ -135,7 +135,7 @@ def get_keystone_manager(endpoint, charm_credentials, api_version=None):
 
     @param endpoint: the keystone endpoint to point client at
     @param charm_credentials: the keystone credentials
-    @param api_version: version of the keystone api the client should use
+    @param api_version: version of the keystone API the client should use
     @returns keystonemanager class used for interrogating keystone
     """
     if api_version:
@@ -192,7 +192,7 @@ class KeystoneManager(object):
     def resolve_role_name(self, name):
         """Find the role_name of a given role
 
-        Find the case-sensative role name that matches the case-insensative
+        Find the case-sensitive role name that matches the case-insensitive
         role name supplied.
 
         :param name: Name of role to look up.
@@ -486,7 +486,7 @@ class KeystoneManager3(KeystoneManager):
             users = manager.api.users.list(domain=domain_id)
             for user in users:
                 if user.name.lower() == name.lower():
-                    # In v3 Domains are seperate user namespaces so need to
+                    # In v3 Domains are separate user namespaces so need to
                     # check that the domain matched if provided
                     if domain:
                         if domain_id == user.domain_id:
@@ -518,7 +518,7 @@ class KeystoneManager3(KeystoneManager):
             if not domain:
                 raise RuntimeError(
                     "Can't resolve a domain as no domain or domain_id "
-                    "supplid.")
+                    "supplied.")
             domain_id = manager.resolve_domain_id(domain)
             if not domain_id:
                 raise ValueError(
@@ -534,12 +534,12 @@ class KeystoneManager3(KeystoneManager):
         """Update the user with data from the **kwargs.
 
         It is the responsibility of the caller to fully define the user
-        that needs to be udpated.  e.g. preferably the user is a
+        that needs to be updated.  e.g. preferably the user is a
         :class:`keystoneclient.v3.users.User`
 
         :param user: The user to be updated.
         :type user: Union[str, keystoneclient.v3.users.User]
-        :params **kwargs: the keys, values to be udpated.
+        :params **kwargs: the keys, values to be updated.
         :type **kwargs: Dict[str, str]
         :returns: the dictionary representation of the updated user
         :rtype: Dict[str, ANY]
@@ -671,7 +671,7 @@ So in the calling file, you get something like this:
     manager = get_manager()
     manager.some_function(a, b, c, y=10)
 
-And that gets translated by the calling code into a json structure
+And that gets translated by the calling code into a JSON structure
 that looks like:
 
 {
@@ -690,7 +690,7 @@ the path as the attributes at each level.
 """
 
 if __name__ == '__main__':
-    # This script needs 1 argument which is the unix domain socket though which
+    # This script needs 1 argument which is the Unix domain socket though which
     # it communicates with the caller.  The program stays running until it is
     # sent a 'STOP' command by the caller, or is just killed.
     if len(sys.argv) != 2:
