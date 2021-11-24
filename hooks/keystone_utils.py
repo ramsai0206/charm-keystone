@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2016 Canonical Ltd
+# Copyright 2016-2021 Canonical Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1726,11 +1726,11 @@ def create_user_credentials(user, passwd_get_callback, passwd_set_callback,
 def create_service_credentials(user, new_roles=None):
     """Create credentials for service with given username.
 
-    For Keystone v2.0 API compability services are given a user under
+    For Keystone v2.0 API compatibility services are given a user under
     config('service-tenant') in DEFAULT_DOMAIN and are given the
     config('admin-role') role. Tenant is assumed to already exist.
 
-    For Keysteone v3 API compability services are given a user in project
+    For Keystone v3 API compatibility services are given a user in project
     config('service-tenant') in SERVICE_DOMAIN and are given the
     config('admin-role') role.
 
@@ -1826,8 +1826,8 @@ def ensure_all_service_accounts_protected_for_pci_dss_options():
 def get_real_role_names(roles, manager):
     """Return the name names of the roles.
 
-    Keystone attempts to be case insensative but not all client code is so
-    sometimes the case sensative role name as it is stored in the DB is
+    Keystone attempts to be case insensitive but not all client code is so
+    sometimes the case sensitive role name as it is stored in the DB is
     needed.
 
     :param roles: List of role names
@@ -1872,7 +1872,7 @@ def add_service_to_keystone(relation_id=None, remote_unit=None):
 
             relation_data["auth_port"] = config('admin-port')
             relation_data["service_port"] = config('service-port')
-            # the internal url is binded to the service-port when
+            # the internal URL is bound to the service-port when
             # bootstrapping keystone in the function bootstrap_keystone(), the
             # same config is handed over in the relation.
             relation_data["internal_port"] = config('service-port')
@@ -2089,7 +2089,7 @@ def add_credentials_to_keystone(relation_id=None, remote_unit=None):
 
 
 def get_protocol():
-    """Determine the http protocol
+    """Determine the HTTP protocol
 
     :returns: http or https
     """
@@ -2198,14 +2198,14 @@ def send_id_service_notifications(data):
     """Send notification on identity-service relation.
 
     Services can optionally request notifications of other services endpoint
-    changes. They do this by sending a space seperated list of service names
+    changes. They do this by sending a space separated list of service names
     that they wish to be notified of. e.g
 
         subscribe_ep_change="placement neutron"
 
     If the endpoints change for any service in the list then a notification is
     sent back with a nonce. e.g. if the neutron ep changes the charm will
-    recieve a json encoded dict of changes:
+    receive a JSON encoded dict of changes:
         'ep_changed': '{"neutron": "1c261658"}'
 
     :param data: Dict of key=value to use as trigger for notification.
@@ -2267,7 +2267,7 @@ def send_id_notifications(data, force=False):
 
     Units are expected to ignore notifications that they don't expect.
 
-    NOTE: settings that are not required/inuse must always be set to None
+    NOTE: settings that are not required/in use must always be set to None
           so that they are removed from the relation.
 
     :param data: Dict of key=value to use as trigger for notification. If the
@@ -2398,7 +2398,7 @@ def determine_python_path():
 
 
 def get_optional_interfaces():
-    """Return the optional interfaces that should be checked if the relavent
+    """Return the optional interfaces that should be checked if the relevant
     relations have appeared.
     :returns: {general_interface: [specific_int1, specific_int2, ...], ...}
     """
@@ -2537,12 +2537,12 @@ def post_snap_install():
     """ Specific steps post snap install for this charm
 
     """
-    log("Perfoming post snap install tasks", INFO)
+    log("Performing post snap install tasks", INFO)
     PASTE_SRC = ('{}/etc/keystone/keystone-paste.ini'
                  ''.format(SNAP_BASE_DIR))
     PASTE_DST = '{}/keystone-paste.ini'.format(SNAP_COMMON_KEYSTONE_DIR)
     if os.path.exists(PASTE_SRC):
-        log("Perfoming post snap install tasks", INFO)
+        log("Performing post snap install tasks", INFO)
         shutil.copy(PASTE_SRC, PASTE_DST)
 
 
@@ -2752,7 +2752,7 @@ def fernet_keys_rotate_and_sync(log_func=log):
 
     The rotation time = token-expiration / (max-active-keys - 2)
 
-    where max-active-keys has a minumum of 3.
+    where max-active-keys has a minimum of 3.
 
     :param log_func: Function to use for logging
     :type log_func: func
@@ -2794,7 +2794,7 @@ def fernet_keys_rotate_and_sync(log_func=log):
 def assemble_endpoints(settings):
     """
     Assemble multiple endpoints from relation data. service name
-    should be prepended to setting name, ie:
+    should be prepended to setting name, i.e.:
      realtion-set ec2_service=$foo ec2_region=$foo ec2_public_url=$foo
      relation-set nova_service=$foo nova_region=$foo nova_public_url=$foo
 

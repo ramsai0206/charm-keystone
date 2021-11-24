@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright 2016 Canonical Ltd
+# Copyright 2016-2021 Canonical Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -254,7 +254,7 @@ def config_changed_postupgrade():
     release = os_release('keystone')
     if run_in_apache(release=release):
         # Need to ensure mod_wsgi is installed and apache2 is reloaded
-        # immediatly as charm querys its local keystone before restart
+        # immediately as charm queries its local keystone before restart
         # decorator can fire
         apt_install(filter_installed_packages(determine_packages()))
         # when deployed from source, init scripts aren't installed
@@ -680,7 +680,7 @@ def configure_https():
     with any required api updates.
     '''
     # need to write all to ensure changes to the entire request pipeline
-    # propagate (c-api, haprxy, apache)
+    # propagate (c-api, haproxy, apache)
     CONFIGS.write_all()
     # NOTE (thedac): When using snaps, nginx is installed, skip any apache2
     # config.
