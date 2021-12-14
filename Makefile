@@ -6,7 +6,7 @@ lint:
 
 test:
 	@echo Starting unit tests...
-	@tox -e py27
+	@tox -e py3
 
 functional_test:
 	@echo Starting Zaza functional tests...
