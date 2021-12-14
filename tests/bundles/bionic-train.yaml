@@ -23,7 +23,7 @@ applications:
     - '0'
   keystone:
     series: bionic
-    charm: ../../../keystone
+    charm: ../../
     num_units: 3
     options:
       openstack-origin: cloud:bionic-train
