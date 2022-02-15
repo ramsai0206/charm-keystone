@@ -5,6 +5,7 @@ bin
 tags
 *.sw[nop]
 *.pyc
+*.charm
 joined-string
 .unit-state.db
 trusty/**
