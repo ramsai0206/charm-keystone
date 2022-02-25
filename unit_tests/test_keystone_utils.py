@@ -2088,3 +2088,46 @@ class TestKeystoneUtils(CharmTestCase):
                 ['member', 'MissingRole'],
                 manager),
             ['Member'])
+
+    @patch.object(utils, 'get_real_role_names')
+    @patch.object(utils, 'grant_role')
+    def test_grant_admin_additional_relation_roles(self, grant_role,
+                                                   get_real_role_names):
+        manager = MagicMock()
+
+        def _real_role_names(roles, manager):
+            return [x.capitalize() for x in roles]
+        get_real_role_names.side_effect = _real_role_names
+        utils.grant_admin_additional_relation_roles(
+            manager,
+            {
+                'add_role_to_admin': ('load-balancer_quota_admin,'
+                                      'load-balancer_admin')})
+        grant_role.assert_has_calls(
+            [
+                call(
+                    'admin',
+                    'Load-balancer_quota_admin',
+                    tenant='admin',
+                    user_domain='admin_domain',
+                    project_domain='admin_domain'),
+                call(
+                    'admin',
+                    'Load-balancer_admin',
+                    tenant='admin',
+                    user_domain='admin_domain',
+                    project_domain='admin_domain')],
+            any_order=True)
+        grant_role.reset_mock()
+        utils.grant_admin_additional_relation_roles(manager, {})
+        self.assertFalse(grant_role.called)
+
+    def test_get_add_role_to_admin(self):
+        self.assertEqual(
+            utils.get_add_role_to_admin({
+                'add_role_to_admin': ('load-balancer_quota_admin,'
+                                      'load-balancer_admin')}),
+            ['load-balancer_quota_admin', 'load-balancer_admin'])
+        self.assertEqual(
+            utils.get_add_role_to_admin({}),
+            [])

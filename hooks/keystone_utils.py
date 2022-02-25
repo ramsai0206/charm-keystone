@@ -1852,6 +1852,37 @@ def get_real_role_names(roles, manager):
     return resolved_roles
 
 
+def grant_admin_additional_relation_roles(manager, settings):
+    """Add additional roles to admin if requested by a related charm.
+
+    :param manager: Manager for this keystone api
+    :type manager: keystone_utils.KeystoneManagerProxy
+    :param settings: Relation data from related unit
+    :type settings: Dict[str]
+    """
+    _additional_admin_roles = get_add_role_to_admin(settings)
+    if not _additional_admin_roles:
+        log("No requests to grant additional roles to admin", level=DEBUG)
+        return
+    log(
+        "Processing request to grant role {} to admin".format(
+            _additional_admin_roles),
+        level=INFO)
+    additional_admin_roles = get_real_role_names(
+        _additional_admin_roles,
+        manager)
+    log(
+        "Matches requested roles to {}".format(additional_admin_roles),
+        level=DEBUG)
+    for role in additional_admin_roles:
+        grant_role(
+            config('admin-user'),
+            role,
+            tenant='admin',
+            user_domain=ADMIN_DOMAIN,
+            project_domain=ADMIN_DOMAIN)
+
+
 def add_service_to_keystone(relation_id=None, remote_unit=None):
     manager = get_manager()
     settings = relation_get(rid=relation_id, unit=remote_unit)
@@ -1896,6 +1927,7 @@ def add_service_to_keystone(relation_id=None, remote_unit=None):
             relation_data["created_roles"] = ','.join(get_real_role_names(
                 requested_roles,
                 manager))
+            grant_admin_additional_relation_roles(manager, settings)
 
             peer_store_and_set(relation_id=relation_id, **relation_data)
             return
@@ -1968,6 +2000,7 @@ def add_service_to_keystone(relation_id=None, remote_unit=None):
     roles = get_requested_roles(settings)
     service_password = create_service_credentials(service_username,
                                                   new_roles=roles)
+    grant_admin_additional_relation_roles(manager, settings)
     service_domain = None
     service_domain_id = None
     if get_api_version() > 2:
@@ -2129,6 +2162,19 @@ def add_endpoint(region, service, publicurl, adminurl, internalurl,
                              adminurl=adminurl,
                              internalurl=internalurl,
                              list_endpoints=list_endpoints)
+
+
+def get_add_role_to_admin(settings):
+    """Extract from relation data roles to grant to admin.
+
+    :param settings: Relation data from related unit
+    :type settings: Dict[str]
+    """
+    if ('add_role_to_admin' in settings and
+            settings['add_role_to_admin'] not in ['None', None]):
+        return settings['add_role_to_admin'].split(',')
+    else:
+        return []
 
 
 def get_requested_roles(settings):
