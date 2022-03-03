@@ -14,4 +14,8 @@ openstack-upgrade:
     Perform openstack upgrades. Config option action-managed-upgrade must be
     set to True.
 security-checklist:
-  description: Validate the running configuration against the OpenStack security guides checklist
+  description: |
+    Validate the running configuration against the OpenStack security guides
+    checklist.
+get-admin-password:
+  description: Retrieve the admin password for the Keystone service.
