@@ -25,6 +25,17 @@ with patch('charmhelpers.contrib.openstack.utils.'
     import actions.actions
 
 
+class ChangeAdminPasswordTestCase(CharmTestCase):
+
+    def setUp(self):
+        super(ChangeAdminPasswordTestCase, self).setUp(
+            actions.actions, ["rotate_admin_passwd"])
+
+    def test_rotate_admin_password(self):
+        actions.actions.rotate_admin_password([])
+        self.rotate_admin_passwd.assert_called_once()
+
+
 class PauseTestCase(CharmTestCase):
 
     def setUp(self):

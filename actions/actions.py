@@ -33,10 +33,19 @@ _add_path(_root)
 from charmhelpers.core.hookenv import action_fail
 
 from keystone_utils import (
+    rotate_admin_passwd,
     pause_unit_helper,
     resume_unit_helper,
     register_configs,
 )
+
+
+def rotate_admin_password(args):
+    """Rotate the admin user's password.
+
+    @raises Exception if keystone client cannot update the password
+    """
+    rotate_admin_passwd()
 
 
 def pause(args):
@@ -57,7 +66,11 @@ def resume(args):
 
 # A dictionary of all the defined actions to callables (which take
 # parsed arguments).
-ACTIONS = {"pause": pause, "resume": resume}
+ACTIONS = {
+    "rotate-admin-password": rotate_admin_password,
+    "pause": pause,
+    "resume": resume,
+}
 
 
 def main(args):

@@ -1500,6 +1500,22 @@ def set_admin_passwd(passwd, user=None):
     _leader_set_secret({'{}_passwd'.format(user): passwd})
 
 
+def rotate_admin_passwd():
+    if not is_leader():
+        raise RuntimeError("This unit is not the leader and therefore can't "
+                           "rotate the admin password.")
+    admin_passwd = config('admin-password')
+    if admin_passwd and admin_passwd.strip().lower() != 'none':
+        raise RuntimeError(
+            "The 'admin-password' config is present, so the action will be "
+            "aborted. To allow randomly generated passwords, unset the "
+            "config value.")
+    user = config('admin-user')
+    new_passwd = pwgen(16)
+    update_user_password(user, new_passwd, ADMIN_DOMAIN)
+    leader_set({'admin_passwd': new_passwd})
+
+
 def get_api_version():
     api_version = config('preferred-api-version')
     cmp_release = CompareOpenStackReleases(

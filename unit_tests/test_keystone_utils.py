@@ -2131,3 +2131,57 @@ class TestKeystoneUtils(CharmTestCase):
         self.assertEqual(
             utils.get_add_role_to_admin({}),
             [])
+
+    @patch.object(utils, 'update_user_password')
+    @patch.object(utils, 'leader_set')
+    @patch.object(utils, 'pwgen')
+    @patch.object(utils, 'is_leader')
+    def test_rotate_admin_password_without_config(
+            self, is_leader, pwgen, leader_set, update_user_password):
+        user = 'test-user'
+        password = 'password'
+        is_leader.return_value = True
+        pwgen.return_value = password
+        self.test_config.set('admin-user', user)
+        self.test_config.set('admin-password', '')
+
+        utils.rotate_admin_passwd()
+
+        pwgen.assert_called_once()
+        update_user_password.assert_called_once_with(
+            user, password, utils.ADMIN_DOMAIN)
+        leader_set.assert_called_once_with({'admin_passwd': password})
+
+    @patch.object(utils, 'update_user_password')
+    @patch.object(utils, 'leader_set')
+    @patch.object(utils, 'pwgen')
+    @patch.object(utils, 'is_leader')
+    def test_rotate_admin_password_with_config(
+            self, is_leader, pwgen, leader_set, update_user_password):
+        user = 'test-user'
+        password = 'password'
+        is_leader.return_value = True
+        self.test_config.set('admin-user', user)
+        self.test_config.set('admin-password', password)
+
+        with self.assertRaises(RuntimeError):
+            utils.rotate_admin_passwd()
+
+        pwgen.assert_not_called()
+        update_user_password.assert_not_called()
+        leader_set.assert_not_called()
+
+    @patch.object(utils, 'update_user_password')
+    @patch.object(utils, 'leader_set')
+    @patch.object(utils, 'pwgen')
+    @patch.object(utils, 'is_leader')
+    def test_rotate_admin_password_outside_leader(
+            self, is_leader, pwgen, leader_set, update_user_password):
+        is_leader.return_value = False
+
+        with self.assertRaises(RuntimeError):
+            utils.rotate_admin_passwd()
+
+        pwgen.assert_not_called()
+        update_user_password.assert_not_called()
+        leader_set.assert_not_called()
