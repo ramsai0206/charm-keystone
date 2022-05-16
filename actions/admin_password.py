@@ -18,6 +18,7 @@ import os
 import sys
 
 sys.path.append('.')
+sys.path.append('./hooks')
 
 from charmhelpers.core.hookenv import (
     function_set,
@@ -25,14 +26,25 @@ from charmhelpers.core.hookenv import (
     leader_get,
 )
 
+from keystone_utils import rotate_admin_passwd
+
 
 def get_admin_password(arg):
     """Implementation of 'get-admin-password' action."""
     function_set({'admin-password': leader_get("admin_passwd")})
 
 
+def rotate_admin_password(args):
+    """Rotate the admin user's password.
+
+    @raises Exception if keystone client cannot update the password
+    """
+    rotate_admin_passwd()
+
+
 ACTIONS = {
-    "get-admin-password": get_admin_password
+    "get-admin-password": get_admin_password,
+    "rotate-admin-password": rotate_admin_password,
 }
 
 

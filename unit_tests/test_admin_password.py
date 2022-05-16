@@ -35,6 +35,17 @@ class GetAdminPasswordTestCase(CharmTestCase):
                                              self.leader_get("admin_passwd")})
 
 
+class RotateAdminPasswordTestCase(CharmTestCase):
+
+    def setUp(self):
+        super(RotateAdminPasswordTestCase, self).setUp(
+            admin_password, ["rotate_admin_passwd"])
+
+    def test_rotate_admin_password(self):
+        admin_password.rotate_admin_password([])
+        self.rotate_admin_passwd.assert_called_once()
+
+
 class MainTestCase(CharmTestCase):
 
     def setUp(self):
