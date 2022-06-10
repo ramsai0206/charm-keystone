@@ -56,7 +56,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
     - '6'
-    channel: yoga/edge
+    channel: latest/edge
 
 relations:
 
