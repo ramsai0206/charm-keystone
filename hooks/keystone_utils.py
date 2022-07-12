@@ -43,6 +43,7 @@ from charmhelpers.contrib.network.ip import (
 )
 
 from charmhelpers.contrib.openstack.ip import (
+    get_invalid_vips,
     resolve_address,
     PUBLIC,
     INTERNAL,
@@ -2516,6 +2517,12 @@ def check_extra_for_assess_status(configs):
             return ('blocked',
                     'hacluster missing configuration: '
                     'vip, vip_iface, vip_cidr')
+
+    # Check if any of the vips are invalid
+    invalid_vips = get_invalid_vips()
+    if invalid_vips:
+        return('blocked', f'Invalid vips: {invalid_vips}')
+
     # verify that the config item, if set, is actually usable and valid
     conf = config('password-security-compliance')
     if (conf and (keystone_context.KeystoneContext
