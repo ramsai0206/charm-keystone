@@ -1,7 +1,7 @@
 variables:
   openstack-origin: &openstack-origin distro
 
-series: impish
+series: kinetic
 
 comment:
 - 'machines section to decide order of deployment. database sooner = faster'
@@ -56,7 +56,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
     - '6'
-    channel: yoga/edge
+    channel: latest/edge
 
 relations:
 
