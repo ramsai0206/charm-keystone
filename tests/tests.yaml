@@ -1,15 +1,15 @@
 charm_name: keystone
 
 smoke_bundles:
-- jammy-yoga
+- jammy-zed
 
 gate_bundles:
-- jammy-yoga
+- jammy-zed
 
 dev_bundles:
-- jammy-yoga
-- jammy-zed
+- jammy-antelope
 - kinetic-zed
+- lunar-antelope
 
 comment: |
   the glance configure job validates operation of identity-service relation.
@@ -41,6 +41,7 @@ tests_options:
     service: keystone
   force_deploy:
     - kinetic-zed
+    - lunar-antelope
 target_deploy_status:
   vault:
     workload-status: blocked
