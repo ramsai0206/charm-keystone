@@ -163,10 +163,22 @@ class HAProxyContext(context.HAProxyContext):
                 api_port('keystone-public'), a_public_port],
         }
 
+        healthcheck = [{
+            'option': 'httpchk GET /healthcheck',
+            'http-check': 'expect status 200',
+        }]
+
+        backend_options = {
+            'admin-port': healthcheck,
+            'public-port': healthcheck,
+        }
+
         # for haproxy.conf
         ctxt['service_ports'] = port_mapping
         # for keystone.conf
         ctxt['listen_ports'] = listen_ports
+        ctxt['backend_options'] = backend_options
+        ctxt['https'] = https()
         return ctxt
 
 

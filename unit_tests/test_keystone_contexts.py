@@ -86,6 +86,7 @@ class TestKeystoneContexts(CharmTestCase):
                                   'ext_ports': [34]})
         self.assertTrue(mock_https.called)
 
+    @patch('keystone_context.https')
     @patch('charmhelpers.contrib.openstack.context.is_ipv6_disabled')
     @patch('charmhelpers.contrib.openstack.context.get_relation_ip')
     @patch('charmhelpers.contrib.openstack.context.mkdir')
@@ -103,7 +104,8 @@ class TestKeystoneContexts(CharmTestCase):
         self, mock_open, mock_kv, mock_log, mock_relation_get,
             mock_related_units, mock_relation_ids, mock_config,
             mock_get_address_in_network, mock_get_netmask_for_address,
-            mock_api_port, mock_mkdir, mock_get_relation_ip, is_ipv6_disabled):
+            mock_api_port, mock_mkdir, mock_get_relation_ip,
+            is_ipv6_disabled, mock_https):
         os.environ['JUJU_UNIT_NAME'] = 'keystone'
 
         mock_relation_ids.return_value = ['identity-service:0', ]
@@ -116,8 +118,14 @@ class TestKeystoneContexts(CharmTestCase):
         self.determine_apache_port.return_value = '34'
         mock_api_port.return_value = '12'
         mock_kv().get.return_value = 'abcdefghijklmnopqrstuvwxyz123456'
+        mock_https.return_value = True
         is_ipv6_disabled.return_value = False
         ctxt = context.HAProxyContext()
+
+        healthcheck = [{
+            'option': 'httpchk GET /healthcheck',
+            'http-check': 'expect status 200',
+        }]
 
         self.maxDiff = None
         _ctxt = ctxt()
@@ -135,6 +143,11 @@ class TestKeystoneContexts(CharmTestCase):
                 'admin-port': ['12', '34'],
                 'public-port': ['12', '34']
             },
+            'backend_options': {
+                'admin-port': healthcheck,
+                'public-port': healthcheck,
+            },
+            'https': True,
             'default_backend': '1.2.3.4',
             'frontends': {
                 '1.2.3.4': {
