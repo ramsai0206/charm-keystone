@@ -1,5 +1,5 @@
 variables:
-  openstack-origin: &openstack-origin distro
+  openstack-origin: &openstack-origin cloud:jammy-antelope
 
 series: jammy
 
@@ -29,8 +29,6 @@ applications:
   mysql-innodb-cluster:
     charm: ch:mysql-innodb-cluster
     num_units: 3
-    options:
-      source: *openstack-origin
     to:
       - '0'
       - '1'
