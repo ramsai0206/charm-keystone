@@ -1,47 +1,43 @@
 charm_name: keystone
 
 smoke_bundles:
-- jammy-antelope
-
+  - jammy-caracal
 gate_bundles:
-- jammy-antelope
-
+  - jammy-antelope
+  - jammy-bobcat
+  - jammy-caracal
 dev_bundles:
-- jammy-bobcat
-- lunar-antelope
-- mantic-bobcat
-
+  - noble-caracal
 comment: |
   the glance configure job validates operation of identity-service relation.
   The policyd test is generic and validates the policy.d overrides work
 
 configure:
-- vault:
-  - zaza.openstack.charm_tests.vault.setup.auto_initialize_no_validation_no_wait
-- keystone:
-  - zaza.openstack.charm_tests.keystone.setup.wait_for_cacert
+  - vault:
+      - zaza.openstack.charm_tests.vault.setup.auto_initialize_no_validation_no_wait
+  - keystone:
+      - zaza.openstack.charm_tests.keystone.setup.wait_for_cacert
+      - zaza.openstack.charm_tests.glance.setup.add_lts_image
+      - zaza.openstack.charm_tests.keystone.setup.add_demo_user
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
   - zaza.openstack.charm_tests.keystone.setup.add_demo_user
-- zaza.openstack.charm_tests.glance.setup.add_lts_image
-- zaza.openstack.charm_tests.keystone.setup.add_demo_user
 
 tests:
-- keystone:
+  - keystone:
+      - zaza.openstack.charm_tests.keystone.tests.AuthenticationAuthorizationTest
+      - zaza.openstack.charm_tests.keystone.tests.CharmOperationTest
+      - zaza.openstack.charm_tests.keystone.tests.SecurityTests
+      - zaza.openstack.charm_tests.policyd.tests.KeystoneTests
   - zaza.openstack.charm_tests.keystone.tests.AuthenticationAuthorizationTest
   - zaza.openstack.charm_tests.keystone.tests.CharmOperationTest
   - zaza.openstack.charm_tests.keystone.tests.SecurityTests
   - zaza.openstack.charm_tests.policyd.tests.KeystoneTests
-- zaza.openstack.charm_tests.keystone.tests.AuthenticationAuthorizationTest
-- zaza.openstack.charm_tests.keystone.tests.CharmOperationTest
-- zaza.openstack.charm_tests.keystone.tests.SecurityTests
-- zaza.openstack.charm_tests.policyd.tests.KeystoneTests
 
 tests_options:
   policyd:
     service: keystone
   force_deploy:
-    - lunar-antelope
-    - mantic-bobcat
+    - noble-caracal
 target_deploy_status:
   vault:
     workload-status: blocked
