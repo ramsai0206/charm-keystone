@@ -54,7 +54,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
     - '6'
-    channel: 2024.1/edge
+    channel: latest/edge
 
 relations:
 
