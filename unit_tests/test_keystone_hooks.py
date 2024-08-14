@@ -282,10 +282,10 @@ class KeystoneRelationTests(CharmTestCase):
         self.assertTrue(configs.write_all.called)
         self.open_port.assert_called_with(5000)
 
-        self.assertTrue(mock_cluster_joined.called)
-        self.assertTrue(update.called)
-        self.assertTrue(mock_update_domains.called)
-        self.assertTrue(mock_notify_middleware.called_once)
+        mock_cluster_joined.assert_called()
+        update.assert_called()
+        mock_update_domains.assert_called()
+        mock_notify_middleware.assert_called_once()
 
         (mock_maybe_do_policyd_overrides_on_config_changed
          .assert_called_once_with(ANY, "keystone", restart_handler=ANY))
