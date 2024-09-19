@@ -459,6 +459,10 @@ valid_services = {
         "type": "instance-ha",
         "desc": "Masakari instance HA for Openstack"
     },
+    "nbosdmapi": {
+        "type": "datamoverapi",
+        "desc": "NetBackup for OpenStack DataMover API Service"
+    },
     "watcher": {
         "type": "infra-optim",
         "desc": "Infrastructure Optimization Service for Openstack"
