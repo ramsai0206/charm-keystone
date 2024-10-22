@@ -477,3 +477,11 @@ options:
       this option sets True as the default value, which is consistent with the
       default value 'WSGISocketRotation On' in Apache. This option should be
       used with caution. Please read the Apache doc page for more information.
+  enable-notifications:
+    type: boolean
+    default: False
+    description: |
+      Enables `oslo.messaging` notifications in Keystone.
+      When set to `True`, Keystone will be configured to send notifications
+      using the `messagingv2` driver. The default value is `False`,
+      meaning notifications are disabled unless explicitly enabled.

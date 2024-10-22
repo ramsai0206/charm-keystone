@@ -247,6 +247,18 @@ class TestKeystoneContexts(CharmTestCase):
         result = context.fernet_enabled()
         self.assertTrue(result)
 
+    def test_notifications_enabled_yes(self):
+        self.os_release.return_value = 'rocky'
+        self.test_config.set('enable-notifications', True)
+        result = context.notifications_enabled()
+        self.assertTrue(result)
+
+    def test_notifications_enabled_no(self):
+        self.os_release.return_value = 'rocky'
+        self.test_config.set('enable-notifications', False)
+        result = context.notifications_enabled()
+        self.assertFalse(result)
+
     @patch.object(context, 'relation_ids')
     @patch.object(context, 'related_units')
     @patch.object(context, 'relation_get')
