@@ -270,6 +270,8 @@ class KeystoneContext(context.OSContextGenerator):
 
         ctxt['default_authorization_ttl'] = config('default-authorization-ttl')
 
+        ctxt['enable_notifications'] = config('enable-notifications')
+
         return ctxt
 
     ALLOWED_SECURITY_COMPLIANCE_SCHEMA = {
@@ -408,6 +410,16 @@ def fernet_enabled():
         return config('token-provider') == 'fernet'
     else:
         return True
+
+
+def notifications_enabled():
+    """Helper function for determining whether notifications are enabled.
+
+    :returns: True if notifications are enabled.
+    :rtype: bool
+    """
+
+    return config('enable-notifications')
 
 
 class KeystoneFIDServiceProviderContext(context.OSContextGenerator):
