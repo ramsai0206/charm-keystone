@@ -860,29 +860,10 @@ def is_bootstrapped():
 
 
 def bootstrap_keystone(configs=None):
-    """Runs ``keystone-manage bootstrap`` to bootstrap keystone.
-
-    The bootstrap command is designed to be idempotent when it needs to be,
-    i.e. if nothing has changed it will do nothing.  It is also safe to run
-    the bootstrap command on a already deployed Keystone.
-
-    The bootstrap command creates resources in the ``default`` domain.  It
-    assigns a system-scoped role to the created user and as such the charm can
-    use it to manage any domains resources.
-
-    For successful operation of the ``keystoneclient`` used by the charm, we
-    must create initial endpoints at bootstrap time.  For HA deployments these
-    will be replaced as soon as HA configuration is complete.
-
-    :param configs: Registered configs
-    :type configs: Optional[Dict]
-    """
+    """Runs ``keystone-manage bootstrap`` to bootstrap keystone."""
     log('Bootstrapping keystone.', level=INFO)
     status_set('maintenance', 'Bootstrapping keystone')
-    # NOTE: The bootstrap process is necessary for the charm to be able to
-    # talk to Keystone.  We will still rely on ``ensure_initial_admin`` to
-    # maintain Keystone's endpoints and the rest of the CRUD.
-
+    
     if not os.path.exists(FERNET_KEY_REPOSITORY):
         mkdir(FERNET_KEY_REPOSITORY,
               owner=KEYSTONE_USER,
@@ -891,7 +872,9 @@ def bootstrap_keystone(configs=None):
 
     api_suffix = get_api_suffix()
     charm_password = leader_get('{}_passwd'.format(CHARM_USER)) or pwgen(64)
-    subprocess.check_call((
+
+    # Prepare the keystone-manage bootstrap command
+    bootstrap_command = (
         'keystone-manage', 'bootstrap',
         '--bootstrap-username', CHARM_USER,
         '--bootstrap-password', charm_password,
@@ -910,11 +893,20 @@ def bootstrap_keystone(configs=None):
             resolve_address(INTERNAL),
             config('service-port'),
             api_suffix),
-        '--bootstrap-region-id', config('region').split()[0]),
+        '--bootstrap-region-id', config('region').split()[0]
     )
-    # TODO: we should consider to add --immutable-roles for supported releases
-    # and/or make it configurable.  Saving for a future change as this one is
-    # big enough as-is.
+
+    try:
+        subprocess.check_call(bootstrap_command)
+    except subprocess.CalledProcessError as e:
+        # Log the error details
+        log(f"Failed to bootstrap keystone: {e}", level=ERROR)
+        log(f"Command: {e.cmd}", level=ERROR)
+        log(f"Return Code: {e.returncode}", level=ERROR)
+        log(f"Output: {getattr(e, 'output', 'No output available')}", level=ERROR)
+        raise  # Re-raise the exception if you want the failure to propagate
+
+    # Additional bootstrap logic
     leader_set({
         'keystone-bootstrapped': True,
         '{}_passwd'.format(CHARM_USER): charm_password,
@@ -922,17 +914,6 @@ def bootstrap_keystone(configs=None):
 
     cmp_release = CompareOpenStackReleases(os_release('keystone'))
     if configs and cmp_release < 'queens':
-        # For Mitaka through Pike we need to work around the lack of support
-        # for system scope by having a special bootstrap version of the
-        # policy.json that ensures the charm has access to retrieve the user ID
-        # created for the charm in the bootstrap process.
-        #
-        # As soon as the user ID is retrieved it will be stored in leader
-        # storage which will be picked up by a context and subsequently written
-        # to the runtime policy.json.
-        #
-        # NOTE: Remove this and the associated policy change as soon as
-        # support for Mitaka -> Pike is removed.
         manager = get_manager()
         transitional_charm_user_id = manager.resolve_user_id(
             CHARM_USER, user_domain='default')
